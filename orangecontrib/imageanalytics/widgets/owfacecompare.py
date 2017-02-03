@@ -229,7 +229,7 @@ class OWFaceCompare(OWWidget):
         new_metas = [StringVariable('match'), StringVariable('match image'), StringVariable('Label')]
         
         X = embedded_images.X
-        Y = np.array([e[1] for e in embeddings]).reshape(-1, 1)
+        Y = np.array([float(e[1]) for e in embeddings]).reshape(-1, 1)
         
         M = np.array([[e[0], e[2], e[0]] for e in embeddings])
         metas = np.hstack((embedded_images.metas, M))
@@ -265,6 +265,14 @@ class OWFaceCompare(OWWidget):
         x = metas[:,neighbors_img_attr].copy()
         metas[:,neighbors_img_attr] = metas[:,reference_img_attr]
         metas[:,reference_img_attr] = x
+        
+        indices = sorted(range(Y.shape[0]),
+                         key=lambda i: Y[i,0], reverse=True)
+        
+        X = np.array([X[i] for i in indices])
+        Y = np.array([Y[i] for i in indices])
+        metas = np.array([metas[i] for i in indices])
+        
         return Table(domain, X, Y, metas)
 
     def _set_server_info(self, connected):
