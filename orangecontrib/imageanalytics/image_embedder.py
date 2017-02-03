@@ -124,7 +124,7 @@ class ImageEmbedder(Http2Client):
         -------
         embeddings: array-like
             Array-like of float16 arrays (embeddings) for
-            successfully embedded images and Nones for skipped images.
+            successfully embedded images and Nones for skipped images .
 
         Raises
         ------
@@ -239,7 +239,8 @@ class ImageEmbedder(Http2Client):
 
         image.thumbnail(self._target_image_size, LANCZOS)
         image_bytes_io = BytesIO()
-        image.save(image_bytes_io, format="JPEG")
+        image.convert('RGB').save(image_bytes_io, format="JPEG")
+        #image.save(image_bytes_io, format="JPEG")
         image.close()
 
         image_bytes_io.seek(0)
