@@ -124,7 +124,7 @@ class ImageEmbedder(Http2Client):
         -------
         embeddings: array-like
             Array-like of float16 arrays (embeddings) for
-            successfully embedded images and Nones for skipped images .
+            successfully embedded images and Nones for skipped images.
 
         Raises
         ------
