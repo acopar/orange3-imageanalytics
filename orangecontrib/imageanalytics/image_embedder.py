@@ -196,11 +196,11 @@ class ImageEmbedder(Http2Client):
 
             cache_key = md5_hash(image)
             cache_keys.append(cache_key)
-            if cache_key in self._cache_dict:
+            #if cache_key in self._cache_dict:
                 # skip the sending because image is present in the
                 # local cache
-                http_streams.append(None)
-                continue
+                #http_streams.append(None)
+                #continue
 
             try:
                 headers = {
