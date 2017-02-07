@@ -106,26 +106,6 @@ class FaceEmbedder(ImageEmbedder):
                     'Content-Length': str(len(body_bytes))
                 }
                 
-                """
-                if self._model == 'inception-v3':
-                    stream_id = self._send_request(
-                        method='POST',
-                        url='/images/' + self._model,
-                        headers=headers,
-                        body_bytes=image
-                    )
-                elif self._model == 'compare-v1':
-                    ref_image = self._load_image_or_none(ref_path)
-                    dct = {'image': image, 'ref': ref_image, 'ref_path': ref_path, 'img_path': file_path} 
-                    body_bytes = pickle.dumps(dct, protocol=2)
-                    headers['Content-Length'] = str(len(body_bytes))
-                    stream_id = self._send_request(
-                        method='POST',
-                        url='/compare/' + self._model,
-                        headers=headers,
-                        body_bytes=body_bytes
-                    )
-                """
                 if self._model == 'classify-v1':
                     stream_id = self._send_request(
                         method='POST',
