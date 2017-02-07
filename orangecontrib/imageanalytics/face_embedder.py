@@ -83,6 +83,9 @@ class FaceEmbedder(ImageEmbedder):
 
         for file_path in file_paths:
             image = self._load_image_or_none(file_path)
+            dct = {'image': image, 'action': 'classify'}
+            body_bytes = pickle.dumps(dct, protocol=2)
+            
             if not image:
                 # skip the sending because image was skipped at loading
                 http_streams.append(None)
@@ -100,10 +103,10 @@ class FaceEmbedder(ImageEmbedder):
             try:
                 headers = {
                     'Content-Type': 'image/jpeg',
-                    'Content-Length': str(len(image))
+                    'Content-Length': str(len(body_bytes))
                 }
                 
-                
+                """
                 if self._model == 'inception-v3':
                     stream_id = self._send_request(
                         method='POST',
@@ -114,8 +117,6 @@ class FaceEmbedder(ImageEmbedder):
                 elif self._model == 'compare-v1':
                     ref_image = self._load_image_or_none(ref_path)
                     dct = {'image': image, 'ref': ref_image, 'ref_path': ref_path, 'img_path': file_path} 
-                    
-            
                     body_bytes = pickle.dumps(dct, protocol=2)
                     headers['Content-Length'] = str(len(body_bytes))
                     stream_id = self._send_request(
@@ -124,12 +125,13 @@ class FaceEmbedder(ImageEmbedder):
                         headers=headers,
                         body_bytes=body_bytes
                     )
-                elif self._model == 'classify-v1':
+                """
+                if self._model == 'classify-v1':
                     stream_id = self._send_request(
                         method='POST',
                         url='/classify/' + self._model,
                         headers=headers,
-                        body_bytes=image
+                        body_bytes=body_bytes
                     )
                 http_streams.append(stream_id)
             except ConnectionError:
