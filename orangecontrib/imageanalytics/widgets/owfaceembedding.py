@@ -49,7 +49,7 @@ class OWFaceEmbedding(OWWidget):
         self._image_embedder = ImageEmbedder(
             model='inception-v3',
             layer='penultimate',
-            server_url='193.2.72.50'
+            server_url='127.0.0.1'
         )
         self._set_server_info(
             self._image_embedder.is_connected_to_server()
