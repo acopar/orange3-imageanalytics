@@ -49,7 +49,7 @@ class OWFaceCassifier(OWWidget):
         self._image_embedder = FaceEmbedder(
             model='classify-v1',
             layer='penultimate',
-            server_url='127.0.0.1'
+            server_url='127.0.0.1:8080'
         )
         self._set_server_info(
             self._image_embedder.is_connected_to_server()

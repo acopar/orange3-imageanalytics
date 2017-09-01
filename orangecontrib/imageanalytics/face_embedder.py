@@ -43,9 +43,8 @@ class FaceEmbedder(ImageEmbedder):
     """
     _cache_file_blueprint = '{:s}_{:s}_embeddings.pickle'
 
-    def __init__(self, model, layer,
-                 server_url='193.2.72.50', server_port=8080):
-        super().__init__(model, layer, server_url=server_url, server_port=server_port)
+    def __init__(self, model, layer, server_url='127.0.0.1:8080'):
+        super().__init__(model, layer, server_url=server_url)
         model_settings = self._get_model_settings_confidently(model, layer)
         
         self._model = model
