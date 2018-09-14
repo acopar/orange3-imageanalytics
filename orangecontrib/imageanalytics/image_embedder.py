@@ -24,6 +24,8 @@ from orangecontrib.imageanalytics.http2_client import Http2Client
 from orangecontrib.imageanalytics.http2_client import MaxNumberOfRequestsError
 from orangecontrib.imageanalytics.utils import md5_hash
 from orangecontrib.imageanalytics.utils import save_pickle, load_pickle
+from orangecontrib.imageanalytics.process_image import job_init, do
+
 
 log = logging.getLogger(__name__)
 ImageFile.LOAD_TRUNCATED_IMAGES = True
@@ -128,6 +130,7 @@ class ImageEmbedder(Http2Client):
             QSettings().value('error-reporting/machine-id', '', type=str)  \
             or str(uuid.getnode())
         self.session_id = None
+        self.graph = job_init()
 
     @staticmethod
     def _get_model_settings_confidently(model, layer):
@@ -261,13 +264,15 @@ class ImageEmbedder(Http2Client):
             if num_yielded == len(list_):
                 return
 
+
     def _send_to_server(self, file_paths, image_processed_callback, retry_n):
         """ Load images and compute cache keys and send requests to
         an http2 server for valid ones.
         """
         cache_keys = []
         http_streams = []
-
+        jobs = []
+        
         for file_path in file_paths:
             if self.cancelled:
                 raise EmbeddingCancelledException()
@@ -286,31 +291,26 @@ class ImageEmbedder(Http2Client):
                 # local cache
                 http_streams.append(None)
                 continue
+            jobs.append((cache_key, image))
 
-            try:
-                headers = {
-                    'Content-Type': 'image/jpeg',
-                    'Content-Length': str(len(image))
-                }
-                stream_id = self._send_request(
-                    method='POST',
-                    url='/image/' + self._model +
-                        '?machine={}&session={}&retry={}'
-                        .format(self.machine_id, self.session_id, retry_n),
-                    headers=headers,
-                    body_bytes=image
-                )
-                http_streams.append(stream_id)
-            except (ConnectionError, BrokenPipeError):
-                self.persist_cache()
-                raise
+        return self._process_images(jobs, image_processed_callback)
 
-        # wait for the responses in a blocking manner
-        return self._get_responses_from_server(
-            http_streams,
-            cache_keys,
-            image_processed_callback
-        )
+    def _process_images(self, jobs, image_processed_callback):
+        embeddings = []
+        results = []
+        BATCH_SIZE = 10
+        for i in range(0,len(jobs),BATCH_SIZE):
+            r = do(self.graph, jobs[i:i+BATCH_SIZE])
+            results.extend(r)
+        
+        for cache_key, embedding in results:
+            embedding = np.array(embedding, dtype=np.float16)
+            embeddings.append(embedding)
+            self._cache_dict[cache_key] = embedding
+            
+        image_processed_callback(True)
+            
+        return embeddings
 
     def _load_image_or_none(self, file_path):
         image = self._load_image_from_url_or_local_path(file_path)
